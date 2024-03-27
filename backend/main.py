@@ -1,7 +1,7 @@
 from llm_inference import PdfQuestionAnswerer
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
 from typing import List
 import os
 
@@ -27,14 +27,18 @@ UPLOAD_DIRECTORY = "temp"
 async def root():
     return {"message": "Hello World"}
 
-
+def initialize_pdf_processor(file_path):
+    global pdf
+    pdf = PdfQuestionAnswerer(file_path)
+    print("PDF Processor Initialized")
+    
 @app.post("/upload/")
-async def upload_files(file: UploadFile):
+async def upload_files(file: UploadFile, background_tasks: BackgroundTasks):
     global pdf
     file_path = os.path.join(UPLOAD_DIRECTORY, file.filename)
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
-        pdf = PdfQuestionAnswerer(file_path)
+        background_tasks.add_task(initialize_pdf_processor, file_path)
 
     return {"filename": file.filename}
 

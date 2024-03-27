@@ -5,11 +5,12 @@ import {
   Message,
   MessageInput,
   Avatar,
+  TypingIndicator,
 } from "@chatscope/chat-ui-kit-react";
 
 import { useState } from "react";
 
-export default function Chatbot() {
+export default function Chatbot(props) {
   const [messages, setMessages] = useState([
     {
       message: "Ask me any question",
@@ -17,6 +18,8 @@ export default function Chatbot() {
     },
   ]);
 
+
+  const [showTyping, setShowTyping] = useState(false);
   const messageElements = messages.map((message, index) => {
     return (
       <Message
@@ -29,7 +32,7 @@ export default function Chatbot() {
         {message.isAI && (
           <Avatar
             name="Emily"
-            src="https://chatscope.io/storybook/react/assets/emily-xzL8sDL2.svg"
+            src="https://img.icons8.com/papercut/60/bot.png"
           />
         )}
       </Message>
@@ -38,22 +41,24 @@ export default function Chatbot() {
 
   function handleSend(message) {
     setMessages((prevMessages) => [...prevMessages, { message, isAI: false }]);
-
+    setShowTyping(true);
     fetch(`http://localhost:8000/invoke/`, {
-        method: 'POST',
-        body: JSON.stringify({
-            'message' : message
-        }),
-        headers: {
-            "Content-type": "application/json; charset=UTF-8"
-        }
-      })
+      method: "POST",
+      body: JSON.stringify({
+        message: message,
+        filename: props.selectedFile?.name,
+      }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         setMessages((prevMessages) => [
           ...prevMessages,
           { message: data.message, isAI: true },
         ]);
+        setShowTyping(false);
       })
       .catch((error) => {
         console.error("Error sending message:", error);
@@ -64,7 +69,7 @@ export default function Chatbot() {
     <div>
       <MainContainer>
         <ChatContainer>
-          <MessageList>{messageElements}</MessageList>
+          <MessageList typingIndicator={showTyping && <TypingIndicator/>}>{messageElements}</MessageList>
           <MessageInput
             placeholder="Type message here"
             onSend={(msg) => handleSend(msg)}

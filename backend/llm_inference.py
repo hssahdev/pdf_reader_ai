@@ -1,5 +1,5 @@
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_community.llms import Ollama
+import model
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain_community.vectorstores import FAISS
@@ -29,8 +29,7 @@ class PdfQuestionAnswerer:
     def __init__(self, pdf_path):
         self.pdf_path = pdf_path
         self.text = load_split_pdf(pdf_path)
-        self.llm = Ollama(model="llama2")
-        # self.llm = Ollama(model="gemma:7b")
+        self.llm = model.llm_model
         self.document_chain = create_stuff_documents_chain(self.llm, PROMPT)
         
         embeddings = OllamaEmbeddings()
