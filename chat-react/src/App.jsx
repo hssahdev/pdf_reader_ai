@@ -5,10 +5,18 @@ import { useState } from 'react'
 
 function App() {
 
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState({
+    file: null,
+    document_id: null,
+  });
+
 
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    setSelectedFile(
+      {
+        file: event.target.files[0],
+        document_id: null,
+      });
   };
 
   console.log(selectedFile);
@@ -20,8 +28,9 @@ function App() {
     }
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    formData.append('file', selectedFile.file);
 
+    console.log('Uploading file...');
     try {
       const response = await fetch('http://localhost:8000/upload/', {
         method: 'POST',
@@ -31,6 +40,8 @@ function App() {
       if (!response.ok) {
         throw new Error('Upload failed');
       }
+
+      response.json().then((data) => {setSelectedFile(prev => ({...prev, document_id: data.document_id}))});
 
       alert('File uploaded successfully!');
     } catch (error) {

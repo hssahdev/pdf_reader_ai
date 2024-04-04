@@ -1,16 +1,25 @@
-from llm_inference import PdfQuestionAnswerer
+from llm_inference import PdfQAAgent
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
-from typing import List
 import os
+import vector_db
+import uuid
+import logging
+import config
+
+logger = logging.getLogger(
+    __name__
+)  
 
 app = FastAPI()
+answerer = PdfQAAgent()
 
-pdf = None
 
 class Message(BaseModel):
     message: str
+    document_id: str = None
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,39 +29,36 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-UPLOAD_DIRECTORY = "temp"
-
 
 @app.get("/hello")
 async def root():
     return {"message": "Hello World"}
 
+
 def initialize_pdf_processor(file_path):
-    global pdf
-    pdf = PdfQuestionAnswerer(file_path)
-    print("PDF Processor Initialized")
-    
+    retreiver = vector_db.insert_file_to_db(file_path)
+
+
 @app.post("/upload/")
 async def upload_files(file: UploadFile, background_tasks: BackgroundTasks):
-    global pdf
-    file_path = os.path.join(UPLOAD_DIRECTORY, file.filename)
+    logger.info("Loading file into DB")
+    file_id = str(uuid.uuid4())
+    file_path = os.path.join(config.UPLOAD_DIRECTORY, file_id)
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
-        background_tasks.add_task(initialize_pdf_processor, file_path)
+        initialize_pdf_processor(file_path)
 
-    return {"filename": file.filename}
+    return {"filename": file.filename, "document_id": file_id}
 
 
 @app.post("/invoke/")
 async def invoke(msg: Message):
-    print(msg)
-    if pdf is None:
-        raise HTTPException(status_code=400, detail="No PDF file uploaded")
-    ans = pdf.answer_question(msg.message)
+    logger.info(f"invoke {msg}")
+    ans = answerer.answer_question_for_a_document(msg.message, msg.document_id)
+    
     return Message(message=ans)
 
 
-# pdf = PdfQuestionAnswerer(args.pdf_path)
 
 if __name__ == "__main__":
     import argparse

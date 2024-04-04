@@ -46,7 +46,7 @@ export default function Chatbot(props) {
       method: "POST",
       body: JSON.stringify({
         message: message,
-        filename: props.selectedFile?.name,
+        document_id: props.selectedFile?.document_id,
       }),
       headers: {
         "Content-type": "application/json; charset=UTF-8",

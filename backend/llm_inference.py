@@ -2,52 +2,25 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 import model
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
-from langchain_community.vectorstores import FAISS
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import OllamaEmbeddings
-from read_pdf import load_split_pdf
+import vector_db
+import config
 
 PROMPT = ChatPromptTemplate.from_template(
-    """Answer the following question based only on the provided context:
-
-<context>
-{context}
-</context>
-
-Question: {input}"""
+    config.PROMPT
 )
 
-text_splitter = RecursiveCharacterTextSplitter(
-    # Set a really small chunk size, just to show.
-    chunk_size=1024,
-    chunk_overlap=20,
-    length_function=len,
-    is_separator_regex=False,
-)
-
-class PdfQuestionAnswerer:
-    def __init__(self, pdf_path):
-        self.pdf_path = pdf_path
-        self.text = load_split_pdf(pdf_path)
+class PdfQAAgent:
+    def __init__(self):
         self.llm = model.llm_model
         self.document_chain = create_stuff_documents_chain(self.llm, PROMPT)
-        
-        embeddings = OllamaEmbeddings()
-        documents = text_splitter.split_text(self.text)
-        vector = FAISS.from_texts(documents, embeddings)
-        retriever = vector.as_retriever()
-        self.retrieval_chain = create_retrieval_chain(retriever, self.document_chain)
-    
+
     def answer_question(self, question):
-        return self.retrieval_chain.invoke({"input": question})["answer"]
+        retriever = vector_db.get_retriever()
+        retrieval_chain = create_retrieval_chain(retriever, self.document_chain)
+        return retrieval_chain.invoke({"input": question})["answer"]
 
-
-
-
-
-
-
-    
-
-
-
+    def answer_question_for_a_document(self, question, doc_id):
+        doc_path = config.UPLOAD_DIRECTORY + "/" + doc_id
+        retriever = vector_db.get_retriever(doc_path)
+        retrieval_chain = create_retrieval_chain(retriever, self.document_chain)
+        return retrieval_chain.invoke({"input": question})["answer"]
