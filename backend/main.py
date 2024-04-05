@@ -32,32 +32,30 @@ app.add_middleware(
 
 @app.get("/hello")
 async def root():
+    logger.info("hello world")
     return {"message": "Hello World"}
-
-
-def initialize_pdf_processor(file_path):
-    retreiver = vector_db.insert_file_to_db(file_path)
 
 
 @app.post("/upload/")
 async def upload_files(file: UploadFile, background_tasks: BackgroundTasks):
-    logger.info("Loading file into DB")
+    logger.info(f"Loading file into DB {file.filename}")
     file_id = str(uuid.uuid4())
     file_path = os.path.join(config.UPLOAD_DIRECTORY, file_id)
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
-        initialize_pdf_processor(file_path)
+        vector_db.insert_file_to_db(file_path)
 
+    logger.info(f"Loaded file into DB {file.filename} with doc_id:{file_id}")
     return {"filename": file.filename, "document_id": file_id}
 
 
 @app.post("/invoke/")
 async def invoke(msg: Message):
-    logger.info(f"invoke {msg}")
+    logger.info(f"invoke endpoint with payload: {msg}")
     ans = answerer.answer_question_for_a_document(msg.message, msg.document_id)
     
+    logger.debug(f"invoke endpoint with payload: {ans}")
     return Message(message=ans)
-
 
 
 if __name__ == "__main__":
