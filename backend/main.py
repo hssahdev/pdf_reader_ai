@@ -8,9 +8,7 @@ import uuid
 import logging
 import config
 
-logger = logging.getLogger(
-    __name__
-)  
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 answerer = PdfQAAgent()
@@ -53,7 +51,7 @@ async def upload_files(file: UploadFile, background_tasks: BackgroundTasks):
 async def invoke(msg: Message):
     logger.info(f"invoke endpoint with payload: {msg}")
     ans = answerer.answer_question_for_a_document(msg.message, msg.document_id)
-    
+
     logger.debug(f"invoke endpoint with payload: {ans}")
     return Message(message=ans)
 

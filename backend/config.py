@@ -1,5 +1,8 @@
-QDRANT_URL = "http://localhost:6333"
-INIT_PDF_FILE = "/Users/harshdeepsingh/Downloads/Recent I-94.pdf"
+import os
+
+# http://host.docker.internal:11434
+QDRANT_URL = "http://host.docker.internal:6333"
+INIT_PDF_FILE = "./sample_file.pdf"
 QDRANT_COLLECTION_NAME = "my_documents"
 UPLOAD_DIRECTORY = "temp"
 LLM_MODEL = "llama2"
@@ -25,3 +28,5 @@ PROMPT = """
         Context: <context>{context}</context>
         Answer:
         """
+        
+OLLAMA_URL = os.getenv('OLLAMA_SERVER_URL', "http://localhost:11434")
