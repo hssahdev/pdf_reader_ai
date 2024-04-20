@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 url = config.QDRANT_URL
 
 client = QdrantClient(url)
-# embedding_model = OllamaEmbeddings(base_url=config.OLLAMA_URL)
-embedding_model = OllamaEmbeddings(base_url="http://host.docker.internal:11434")
+embedding_model = OllamaEmbeddings(base_url=config.OLLAMA_URL)
 
 init_doc = load_split_pdf(
     config.INIT_PDF_FILE
