@@ -1,7 +1,7 @@
 import "./App.css";
 import Chatbot from "./components/ChatBot";
 import Header from "./components/Header";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 function App() {
   const [selectedFile, setSelectedFile] = useState({
@@ -22,10 +22,13 @@ function App() {
       return;
     }
 
+    
+
     const formData = new FormData();
     formData.append("file", selectedFile.file);
 
     console.log("Uploading file...");
+    toggleModal();
     try {
       const response = await fetch("http://localhost:8000/upload/", {
         method: "POST",
@@ -40,17 +43,28 @@ function App() {
         setSelectedFile((prev) => ({ ...prev, document_id: data.document_id }));
       });
 
-      alert("File uploaded successfully!");
+      toggleModal();
     } catch (error) {
       console.error("Error uploading file:", error);
+      toggleModal();
       alert("Error uploading file. Please try again.");
     }
+  };
+
+  const opacityRef = useRef(null);
+  const toggleModal = () => {
+    if (opacityRef.current.classList.contains("modal-open"))
+      opacityRef.current.classList.remove("modal-open");
+    else opacityRef.current.classList.add("modal-open");
   };
 
   return (
     <>
       <Header handleSubmit={handleSubmit} handleFileChange={handleFileChange} />
       <Chatbot selectedFile={selectedFile} />
+      <div className="modal" ref={opacityRef}>
+        <div className="loader"></div>
+      </div>
     </>
   );
 }
