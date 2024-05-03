@@ -1,46 +1,110 @@
 import {
+  MinChatUiProvider,
   MainContainer,
-  ChatContainer,
-  MessageList,
-  Message,
   MessageInput,
-  Avatar,
+  MessageContainer,
+  MessageList,
   TypingIndicator,
-} from "@chatscope/chat-ui-kit-react";
+} from "@minchat/react-chat-ui";
 
 import { useState } from "react";
+
+const colorSet = {
+  // input
+  // "--input-background-color": "#FF0000",
+  // "--input-text-color": "#fff",
+  // "--input-element-color": "rgb(0, 0, 255)",
+  // "--input-attach-color": "#fff",
+  // "--input-send-color": "#fff",
+  // "--input-placeholder-color": "rgb(255, 255, 255)",
+
+  // // message header
+  // "--message-header-background-color": "#FF0000",
+  // "--message-header-text-color": "#fff",
+  // "--message-header-last-active-color": "rgb(0, 0, 255)",
+  // "--message-header-back-color": "rgb(255, 255, 255)",
+
+  // // chat list header
+  // "--chatlist-header-background-color": "#FF0000",
+  // "--chatlist-header-text-color": "rgb(255, 255, 255)",
+  // "--chatlist-header-divider-color": "rgb(0, 128, 0)",
+
+  // //chatlist
+  // "--chatlist-background-color": "blue",
+  // "--no-conversation-text-color": "rgb(255, 255, 255)",
+
+  // //chat item
+  // "--chatitem-background-color": "rgb(0, 0, 255)",
+  // "--chatitem-selected-background-color": "rgb(255, 255, 0)",
+  // "--chatitem-title-text-color": "#FF0000",
+  // "--chatitem-content-text-color": "#FF0000",
+  // "--chatitem-hover-color": "#FF0000",
+
+  // //main container
+  // "--container-background-color": "rgb(255, 192, 203)",
+
+  // //loader
+  // "--loader-color": "rgb(0, 128, 0)",
+
+  // //message list
+  "--messagelist-background-color": "#222",
+  // "--no-message-text-color": "rgb(255, 255, 255)",
+
+  // // incoming message
+  "--incoming-message-text-color": "white",
+  // "--incoming-message-name-text-color": "rgb(255, 255, 255)",
+  // "--incoming-message-background-color": "rgb(0, 128, 0)",
+  // "--incoming-message-timestamp-color": "rgb(255, 255, 255)",
+  // "--incoming-message-link-color": "#FF0000",
+
+  // //outgoing message
+  "--outgoing-message-text-color": "white",
+  // "--outgoing-message-background-color": "rgb(255, 255, 0)",
+  // "--outgoing-message-timestamp-color": "#FF0000",
+  // "--outgoing-message-checkmark-color": "#FF0000",
+  // "--outgoing-message-loader-color": "#FF0000",
+  // "--outgoing-message-link-color": "rgb(0, 128, 0)",
+};
 
 export default function Chatbot(props) {
   const [messages, setMessages] = useState([
     {
-      message: "Ask me any question",
-      isAI: true,
+      text: "Ask me any question",
+      user: {
+        id: "ai",
+        name: "AI",
+      },
     },
   ]);
 
-
   const [showTyping, setShowTyping] = useState(false);
-  const messageElements = messages.map((message, index) => {
-    return (
-      <Message
-        key={index}
-        model={{
-          message: message.message,
-          direction: message.isAI ? "incoming" : "outgoing",
-        }}
-      >
-        {message.isAI && (
-          <Avatar
-            name="Emily"
-            src="https://img.icons8.com/papercut/60/bot.png"
-          />
-        )}
-      </Message>
-    );
-  });
 
   function handleSend(message) {
-    setMessages((prevMessages) => [...prevMessages, { message, isAI: false }]);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      {
+        text: message,
+        user: {
+          id: "self",
+          name: "Self",
+        },
+      },
+    ]);
+
+    if (props.selectedFile.document_id === null) {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          text: "Please upload a document first",
+          user: {
+            id: "ai",
+            name: "AI",
+          },
+        },
+      ]);
+      return;
+    }
+
     setShowTyping(true);
     fetch(`http://localhost:8000/invoke/`, {
       method: "POST",
@@ -56,7 +120,13 @@ export default function Chatbot(props) {
       .then((data) => {
         setMessages((prevMessages) => [
           ...prevMessages,
-          { message: data.message, isAI: true },
+          {
+            text: data.message,
+            user: {
+              id: "ai",
+              name: "AI",
+            },
+          },
         ]);
         setShowTyping(false);
       })
@@ -66,17 +136,21 @@ export default function Chatbot(props) {
   }
 
   return (
-    <div>
-      <MainContainer>
-        <ChatContainer>
-          <MessageList typingIndicator={showTyping && <TypingIndicator/>}>{messageElements}</MessageList>
-          <MessageInput
-            placeholder="Type message here"
-            onSend={(msg) => handleSend(msg)}
-            attachButton={false}
-          />
-        </ChatContainer>
-      </MainContainer>
+    <div className="chat-container">
+      <MinChatUiProvider theme="grey" colorSet={colorSet} isTyping={true}>
+        <MainContainer style={{ height: "50vh" }}>
+          <MessageContainer>
+            <MessageList currentUserId="self" messages={messages} />
+            {showTyping && <TypingIndicator />}
+            <MessageInput
+              placeholder="Type message here"
+              showAttachButton={false}
+              onSendMessage={handleSend}
+            />
+          </MessageContainer>
+        </MainContainer>
+      </MinChatUiProvider>
     </div>
   );
+
 }
