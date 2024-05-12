@@ -1,8 +1,8 @@
 import os
 
 # http://host.docker.internal:11434
-# QDRANT_URL = "http://host.docker.internal:6333"
-QDRANT_URL = "http://localhost:6333"
+QDRANT_URL = "http://host.docker.internal:6333"
+# QDRANT_URL = "http://localhost:6333"
 INIT_PDF_FILE = "./sample_file.pdf"
 QDRANT_COLLECTION_NAME = "my_documents"
 UPLOAD_DIRECTORY = "temp"
@@ -30,4 +30,4 @@ PROMPT = """
         Answer:
         """
         
-OLLAMA_URL = "http://localhost:11434"
+OLLAMA_URL = "http://host.docker.internal:11434"
