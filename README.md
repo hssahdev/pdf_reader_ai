@@ -1,12 +1,15 @@
 # PDF Reader AI with LangChain, Ollama, FastAPI Backend and ReactJS Frontend 
 
-This project is a chatbot application that interacts with PDF documents using LangChain and Ollama for natural language processing capabilities. It also features a frontend built using ReactJS for a user-friendly interface.
+This project is a chatbot application that interacts with PDF documents using LangChain and Ollama for local natural language processing capabilities. It also features a frontend built using ReactJS for a user-friendly interface.
 
 ## Features
 
 - **PDF Interaction**: The chatbot allows users to interact with PDF documents, extracting information and performing tasks based on natural language commands.
 - **LangChain Integration**: LangChain provides language understanding capabilities, allowing the chatbot to interpret user commands and extract relevant information from PDFs.
 - **ReactJS Frontend**: The frontend interface is built using ReactJS, providing a modern and responsive user experience.
+- **Local LLaMa**: Leverages Meta's open source LLM and Ollama to power local inference.
+- **Vector DB**: Has a standalone Qdrant vector DB to store documents and efficiently query vectors to get meaningful context.
+- **Scalable FastAPI backend**: Engineered a stateless REST FastAPI backend to handle async requests (upload files and infer LLM). Horizantally scalable to handle numerous requests.
 
 ## Usage
 
@@ -46,6 +49,12 @@ This project is a chatbot application that interacts with PDF documents using La
 - **LangChain**: A natural language processing library used for language understanding and document interaction.
 - **Ollama**: A conversational AI platform that enhances the chatbot's conversational abilities.
 - **ReactJS**: A JavaScript library for building user interfaces, used for the frontend of the application.
+
+## Demo
+
+
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/aNReyESQzFE/0.jpg)](https://youtu.be/aNReyESQzFE)
+
 
 ## Contributing
 
